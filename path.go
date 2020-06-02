@@ -1,4 +1,4 @@
-// Package path contains utilities to work with ipfs paths.
+// Package path contains utilities to work with btfs paths.
 package path
 
 import (
@@ -9,10 +9,10 @@ import (
 	cid "github.com/ipfs/go-cid"
 )
 
-// A Path represents an ipfs content path:
+// A Path represents an btfs content path:
 //   * /<cid>/path/to/file
-//   * /ipfs/<cid>
-//   * /ipns/<cid>/path/to/folder
+//   * /btfs/<cid>
+//   * /btns/<cid>/path/to/folder
 //   * etc
 type Path string
 
@@ -27,7 +27,7 @@ func FromString(s string) Path {
 
 // FromCid safely converts a cid.Cid type to a Path type.
 func FromCid(c cid.Cid) Path {
-	return Path("/ipfs/" + c.String())
+	return Path("/btfs/" + c.String())
 }
 
 // Segments returns the different elements of a path
@@ -49,11 +49,11 @@ func (p Path) String() string {
 	return string(p)
 }
 
-// IsJustAKey returns true if the path is of the form <key> or /ipfs/<key>, or
+// IsJustAKey returns true if the path is of the form <key> or /btfs/<key>, or
 // /ipld/<key>
 func (p Path) IsJustAKey() bool {
 	parts := p.Segments()
-	return len(parts) == 2 && (parts[0] == "ipfs" || parts[0] == "ipld")
+	return len(parts) == 2 && (parts[0] == "btfs" || parts[0] == "ipld")
 }
 
 // PopLastSegment returns a new Path without its final segment, and the final
@@ -79,11 +79,11 @@ func FromSegments(prefix string, seg ...string) (Path, error) {
 	return ParsePath(prefix + strings.Join(seg, "/"))
 }
 
-// ParsePath returns a well-formed ipfs Path.
-// The returned path will always be prefixed with /ipfs/ or /ipns/.
+// ParsePath returns a well-formed btfs Path.
+// The returned path will always be prefixed with /btfs/ or /btns/.
 // The prefix will be added if not present in the given string.
 // This function will return an error when the given string is
-// not a valid ipfs path.
+// not a valid btfs path.
 func ParsePath(txt string) (Path, error) {
 	parts := strings.Split(txt, "/")
 	if len(parts) == 1 {
@@ -94,13 +94,13 @@ func ParsePath(txt string) (Path, error) {
 	}
 
 	// if the path doesnt begin with a '/'
-	// we expect this to start with a hash, and be an 'ipfs' path
+	// we expect this to start with a hash, and be an 'btfs' path
 	if parts[0] != "" {
 		if _, err := cid.Decode(parts[0]); err != nil {
 			return "", &pathError{error: err, path: txt}
 		}
 		// The case when the path starts with hash without a protocol prefix
-		return Path("/ipfs/" + txt), nil
+		return Path("/btfs/" + txt), nil
 	}
 
 	if len(parts) < 3 {
@@ -109,7 +109,7 @@ func ParsePath(txt string) (Path, error) {
 
 	//TODO: make this smarter
 	switch parts[1] {
-	case "ipfs", "ipld":
+	case "btfs", "ipld":
 		if parts[2] == "" {
 			return "", &pathError{error: fmt.Errorf("not enough path components"), path: txt}
 		}
@@ -118,7 +118,7 @@ func ParsePath(txt string) (Path, error) {
 		if err != nil {
 			return "", &pathError{error: fmt.Errorf("invalid CID: %s", err), path: txt}
 		}
-	case "ipns":
+	case "btns":
 		if parts[2] == "" {
 			return "", &pathError{error: fmt.Errorf("not enough path components"), path: txt}
 		}
@@ -129,7 +129,7 @@ func ParsePath(txt string) (Path, error) {
 	return Path(txt), nil
 }
 
-// ParseCidToPath takes a CID in string form and returns a valid ipfs Path.
+// ParseCidToPath takes a CID in string form and returns a valid btfs Path.
 func ParseCidToPath(txt string) (Path, error) {
 	if txt == "" {
 		return "", &pathError{error: fmt.Errorf("empty"), path: txt}
@@ -143,7 +143,7 @@ func ParseCidToPath(txt string) (Path, error) {
 	return FromCid(c), nil
 }
 
-// IsValid checks if a path is a valid ipfs Path.
+// IsValid checks if a path is a valid btfs Path.
 func (p *Path) IsValid() error {
 	_, err := ParsePath(p.String())
 	return err
@@ -163,7 +163,7 @@ func SplitList(pth string) []string {
 // must be a Multihash) and return it separately.
 func SplitAbsPath(fpath Path) (cid.Cid, []string, error) {
 	parts := fpath.Segments()
-	if parts[0] == "ipfs" || parts[0] == "ipld" {
+	if parts[0] == "btfs" || parts[0] == "ipld" {
 		parts = parts[1:]
 	}
 
