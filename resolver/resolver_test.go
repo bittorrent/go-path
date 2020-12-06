@@ -126,7 +126,7 @@ func TestResolveToLastNode_NoUnnecessaryFetching(t *testing.T) {
 	aKey := a.Cid()
 
 	segments := []string{aKey.String(), "child"}
-	p, err := path.FromSegments("/ipfs/", segments...)
+	p, err := path.FromSegments("/btfs/", segments...)
 	if err != nil {
 		t.Fatal(err)
 	}
