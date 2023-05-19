@@ -10,10 +10,10 @@ import (
 )
 
 // A Path represents an btfs content path:
-//   * /<cid>/path/to/file
-//   * /btfs/<cid>
-//   * /btns/<cid>/path/to/folder
-//   * etc
+//   - /<cid>/path/to/file
+//   - /btfs/<cid>
+//   - /btns/<cid>/path/to/folder
+//   - etc
 type Path string
 
 // ^^^
@@ -96,34 +96,34 @@ func ParsePath(txt string) (Path, error) {
 	// if the path doesnt begin with a '/'
 	// we expect this to start with a hash, and be an 'btfs' path
 	if parts[0] != "" {
-		if _, err := cid.Decode(parts[0]); err != nil {
-			return "", &pathError{error: err, path: txt}
+		if _, err := decodeCid(parts[0]); err != nil {
+			return "", &ErrInvalidPath{error: err, path: txt}
 		}
 		// The case when the path starts with hash without a protocol prefix
 		return Path("/btfs/" + txt), nil
 	}
 
 	if len(parts) < 3 {
-		return "", &pathError{error: fmt.Errorf("path does not begin with '/'"), path: txt}
+		return "", &ErrInvalidPath{error: fmt.Errorf("invalid btfs path"), path: txt}
 	}
 
 	//TODO: make this smarter
 	switch parts[1] {
 	case "btfs", "ipld":
 		if parts[2] == "" {
-			return "", &pathError{error: fmt.Errorf("not enough path components"), path: txt}
+			return "", &ErrInvalidPath{error: fmt.Errorf("not enough path components"), path: txt}
 		}
 		// Validate Cid.
-		_, err := cid.Decode(parts[2])
+		_, err := decodeCid(parts[2])
 		if err != nil {
-			return "", &pathError{error: fmt.Errorf("invalid CID: %s", err), path: txt}
+			return "", &ErrInvalidPath{error: fmt.Errorf("invalid CID: %w", err), path: txt}
 		}
 	case "btns":
 		if parts[2] == "" {
-			return "", &pathError{error: fmt.Errorf("not enough path components"), path: txt}
+			return "", &ErrInvalidPath{error: fmt.Errorf("not enough path components"), path: txt}
 		}
 	default:
-		return "", &pathError{error: fmt.Errorf("unknown namespace %q", parts[1]), path: txt}
+		return "", &ErrInvalidPath{error: fmt.Errorf("unknown namespace %q", parts[1]), path: txt}
 	}
 
 	return Path(txt), nil
@@ -132,12 +132,12 @@ func ParsePath(txt string) (Path, error) {
 // ParseCidToPath takes a CID in string form and returns a valid btfs Path.
 func ParseCidToPath(txt string) (Path, error) {
 	if txt == "" {
-		return "", &pathError{error: fmt.Errorf("empty"), path: txt}
+		return "", &ErrInvalidPath{error: fmt.Errorf("empty"), path: txt}
 	}
 
-	c, err := cid.Decode(txt)
+	c, err := decodeCid(txt)
 	if err != nil {
-		return "", &pathError{error: err, path: txt}
+		return "", &ErrInvalidPath{error: err, path: txt}
 	}
 
 	return FromCid(c), nil
@@ -169,14 +169,22 @@ func SplitAbsPath(fpath Path) (cid.Cid, []string, error) {
 
 	// if nothing, bail.
 	if len(parts) == 0 {
-		return cid.Cid{}, nil, &pathError{error: fmt.Errorf("empty"), path: string(fpath)}
+		return cid.Cid{}, nil, &ErrInvalidPath{error: fmt.Errorf("empty"), path: string(fpath)}
 	}
 
-	c, err := cid.Decode(parts[0])
+	c, err := decodeCid(parts[0])
 	// first element in the path is a cid
 	if err != nil {
-		return cid.Cid{}, nil, &pathError{error: fmt.Errorf("invalid CID: %s", err), path: string(fpath)}
+		return cid.Cid{}, nil, &ErrInvalidPath{error: fmt.Errorf("invalid CID: %w", err), path: string(fpath)}
 	}
 
 	return c, parts[1:], nil
+}
+
+func decodeCid(cstr string) (cid.Cid, error) {
+	c, err := cid.Decode(cstr)
+	if err != nil && len(cstr) == 46 && cstr[:2] == "qm" { // https://github.com/ipfs/go-ipfs/issues/7792
+		return cid.Cid{}, fmt.Errorf("%v (possible lowercased CIDv0; consider converting to a case-agnostic CIDv1, such as base32)", err)
+	}
+	return c, err
 }
