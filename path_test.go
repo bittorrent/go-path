@@ -51,6 +51,19 @@ func TestNoComponents(t *testing.T) {
 	}
 }
 
+func TestInvalidPaths(t *testing.T) {
+	for _, s := range []string{
+		"/ipfs",
+		"/testfs",
+		"/",
+	} {
+		_, err := ParsePath(s)
+		if err == nil || !strings.Contains(err.Error(), "invalid ipfs path") || !strings.Contains(err.Error(), s) {
+			t.Error("wrong error")
+		}
+	}
+}
+
 func TestIsJustAKey(t *testing.T) {
 	cases := map[string]bool{
 		"QmdfTbBqBPQ7VNxZEYEj14VmRuZBkqFbiwReogJgS1zR1n":           true,
@@ -100,5 +113,16 @@ func TestPopLastSegment(t *testing.T) {
 		if tail != expected[1] {
 			t.Fatalf("expected tail of PopLastSegment(%s) to return %v, not %v", p, expected[1], tail)
 		}
+	}
+}
+
+func TestV0ErrorDueToLowercase(t *testing.T) {
+	badb58 := "/ipfs/qmbwqxbekc3p8tqskc98xmwnzrzdtrlmimpl8wbutgsmnr"
+	_, err := ParsePath(badb58)
+	if err == nil {
+		t.Fatal("should have failed to decode")
+	}
+	if !strings.HasSuffix(err.Error(), "(possible lowercased CIDv0; consider converting to a case-agnostic CIDv1, such as base32)") {
+		t.Fatal("should have meaningful info about case-insensitive fix")
 	}
 }
