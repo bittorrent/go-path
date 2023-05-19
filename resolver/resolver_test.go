@@ -171,7 +171,7 @@ func TestResolveToLastNode_ErrNoLink(t *testing.T) {
 
 	// test missing link intermediate segment
 	segments := []string{aKey.String(), "cheese", "time"}
-	p, err := path.FromSegments("/ipfs/", segments...)
+	p, err := path.FromSegments("/btfs/", segments...)
 	require.NoError(t, err)
 
 	_, _, err = r.ResolveToLastNode(ctx, p)
@@ -180,7 +180,7 @@ func TestResolveToLastNode_ErrNoLink(t *testing.T) {
 	// test missing link at end
 	bKey := b.Cid()
 	segments = []string{aKey.String(), "child", "apples"}
-	p, err = path.FromSegments("/ipfs/", segments...)
+	p, err = path.FromSegments("/btfs/", segments...)
 	require.NoError(t, err)
 
 	_, _, err = r.ResolveToLastNode(ctx, p)

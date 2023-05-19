@@ -10,10 +10,10 @@ import (
 )
 
 // A Path represents an btfs content path:
-//   * /<cid>/path/to/file
-//   * /btfs/<cid>
-//   * /btns/<cid>/path/to/folder
-//   * etc
+//   - /<cid>/path/to/file
+//   - /btfs/<cid>
+//   - /btns/<cid>/path/to/folder
+//   - etc
 type Path string
 
 // ^^^

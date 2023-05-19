@@ -53,12 +53,12 @@ func TestNoComponents(t *testing.T) {
 
 func TestInvalidPaths(t *testing.T) {
 	for _, s := range []string{
-		"/ipfs",
+		"/btfs",
 		"/testfs",
 		"/",
 	} {
 		_, err := ParsePath(s)
-		if err == nil || !strings.Contains(err.Error(), "invalid ipfs path") || !strings.Contains(err.Error(), s) {
+		if err == nil || !strings.Contains(err.Error(), "invalid btfs path") || !strings.Contains(err.Error(), s) {
 			t.Error("wrong error")
 		}
 	}
@@ -117,7 +117,7 @@ func TestPopLastSegment(t *testing.T) {
 }
 
 func TestV0ErrorDueToLowercase(t *testing.T) {
-	badb58 := "/ipfs/qmbwqxbekc3p8tqskc98xmwnzrzdtrlmimpl8wbutgsmnr"
+	badb58 := "/btfs/qmbwqxbekc3p8tqskc98xmwnzrzdtrlmimpl8wbutgsmnr"
 	_, err := ParsePath(badb58)
 	if err == nil {
 		t.Fatal("should have failed to decode")
