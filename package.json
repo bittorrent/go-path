@@ -1,10 +1,10 @@
 {
   "author": "why",
   "bugs": {
-    "url": "https://github.com/ipfs/go-path"
+    "url": "https://github.com/bittorrent/go-path"
   },
   "gx": {
-    "dvcsimport": "github.com/ipfs/go-path"
+    "dvcsimport": "github.com/bittorrent/go-path"
   },
   "gxDependencies": [
     {

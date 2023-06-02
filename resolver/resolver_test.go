@@ -19,10 +19,10 @@ import (
 	"github.com/ipld/go-ipld-prime/schema"
 	"github.com/multiformats/go-multihash"
 
+	path "github.com/bittorrent/go-path"
+	"github.com/bittorrent/go-path/resolver"
 	merkledag "github.com/ipfs/go-merkledag"
 	dagmock "github.com/ipfs/go-merkledag/test"
-	path "github.com/ipfs/go-path"
-	"github.com/ipfs/go-path/resolver"
 	"github.com/ipfs/go-unixfsnode"
 	dagcbor "github.com/ipld/go-ipld-prime/codec/dagcbor"
 	dagjson "github.com/ipld/go-ipld-prime/codec/dagjson"
