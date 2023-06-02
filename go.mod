@@ -1,4 +1,4 @@
-module github.com/ipfs/go-path
+module github.com/bittorrent/go-path
 
 go 1.19
 
